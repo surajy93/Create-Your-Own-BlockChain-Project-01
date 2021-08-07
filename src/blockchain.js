@@ -70,6 +70,7 @@ class Blockchain {
                 block.previousBlockHash = self.chain[self.height].hash;
             }
             block.hash = SHA256(JSON.stringify(block)).toString();
+            this.validateChain()
             self.chain.push(block);
             self.height += 1;
             if (self.chain[self.height] == block){
@@ -90,7 +91,7 @@ class Blockchain {
      */
     requestMessageOwnershipVerification(address) {
         return new Promise((resolve) => {
-            resolve(address + ':' + new Date().getTime().toString().slice(0, -3));
+            resolve(address + ':' + new Date().getTime().toString().slice(0, -3) + ':starRegistery');
         });
     }
 
@@ -117,7 +118,7 @@ class Blockchain {
             let time = parseInt(message.split(':')[1]);
             let currentTime = parseInt(new Date().getTime().toString().slice(0,-3));
 
-            if (time > currentTime - 300000) {
+            if (time > currentTime - 300) {
                 if(bitcoinMessage.verify(message, address, signature)) {
                     let block = new BlockClass.Block({"owner": address, "star": star});
                     await self._addBlock(block);
@@ -140,7 +141,7 @@ class Blockchain {
     getBlockByHash(hash) {
         let self = this;
         return new Promise((resolve, reject) => {
-            let block = self.chain.filter(p => p.hash === hash)[0];
+            let block = self.chain.find(p => p.hash === hash)[0];
             if (block) {
                 resolve(block);
             } else {
